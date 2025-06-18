@@ -4,7 +4,7 @@ La aplicación es una lista de precios que permite agregar nuevos productos y vi
 
 Está compuesta por:
 
-* Un frontend estático en HTML.
+* Un frontend estático en HTML (Separado en 2 paginas)
 * Una API en Express.js.
 * Una base de datos PostgreSQL.
 

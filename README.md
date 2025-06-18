@@ -8,4 +8,4 @@ Está compuesta por:
 * Una API en Express.js.
 * Una base de datos PostgreSQL.
 
-Todas estas aplicaciones se encuentran orquestradas por un `docker-compose`.
+Todas estas aplicaciones se pueden orquestradas por un `docker-compose`.

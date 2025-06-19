@@ -35,10 +35,7 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-// Serve static files from the frontend directory
-app.use(express.static(path.join(__dirname, './frontend')));
+app.use('/api-docs', swaggerUi.serve, swag  gerUi.setup(swaggerDocs));
 
 // Database configuration
 const pool = new Pool({

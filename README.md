@@ -14,8 +14,12 @@ Todas estas aplicaciones pueden ser orquestradas por un `docker-compose`.
 
 * https://supabase.com/ Para la base de datos
 * La api la vamos a desplegar en https://render.com/
-* 
+* Y el front tambien? Pero porque?? Expliquemos.
 
+---
+
+Issue supabase + render 
+https://community.render.com/t/backend-in-render-does-not-access-supabase-com/22216
 
 --- 
 Otras alternativas que pueden chusmear : 

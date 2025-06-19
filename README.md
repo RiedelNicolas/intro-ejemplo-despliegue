@@ -14,7 +14,8 @@ Todas estas aplicaciones pueden ser orquestradas por un `docker-compose`.
 
 * https://supabase.com/ Para la base de datos
 * La api la vamos a desplegar en https://render.com/
-* Y el front tambien? Pero porque?? Expliquemos.
+* El front (Estatico) tambien en render :).
+* 
 
 ---
 

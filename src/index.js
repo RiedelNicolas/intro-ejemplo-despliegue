@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
@@ -36,6 +37,9 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+// Serve static files from the frontend directory
+app.use(express.static(path.join(__dirname, './frontend')));
+
 // Database configuration
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -48,10 +52,13 @@ const pool = new Pool({
 // Initialize database schema
 async function initializeDatabase() {
   try {
-    // Create products table if it doesn't exist
+    // Drop the table if it exists to ensure a clean slate on restart
+    await pool.query('DROP TABLE IF EXISTS productos');
+    
+    // Create products table with auto-generating ID
     await pool.query(`
       CREATE TABLE IF NOT EXISTS productos (
-        id VARCHAR(10) PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         category VARCHAR(100) NOT NULL,
         stock INTEGER NOT NULL DEFAULT 0,
@@ -69,20 +76,20 @@ async function initializeDatabase() {
     if (count === 0) {
       console.log('Seeding database with initial products...');
       const initialProducts = [
-        { id: '001', name: 'Laptop Dell XPS 13', category: 'Electrónicos', stock: 5, price: '$1,299.99' },
-        { id: '002', name: 'Mouse Logitech MX Master', category: 'Accesorios', stock: 15, price: '$99.99' },
-        { id: '003', name: 'Teclado Mecánico Corsair', category: 'Accesorios', stock: 25, price: '$149.99' },
-        { id: '004', name: 'Monitor Samsung 27"', category: 'Electrónicos', stock: 12, price: '$329.99' },
-        { id: '005', name: 'Auriculares Sony WH-1000XM4', category: 'Audio', stock: 3, price: '$349.99' },
-        { id: '006', name: 'Webcam Logitech C920', category: 'Accesorios', stock: 18, price: '$79.99' },
-        { id: '007', name: 'SSD Samsung 1TB', category: 'Almacenamiento', stock: 20, price: '$119.99' },
-        { id: '008', name: 'Router TP-Link AC1750', category: 'Redes', stock: 7, price: '$89.99' }
+        { name: 'Laptop Dell XPS 13', category: 'Electrónicos', stock: 5, price: '$1,299.99' },
+        { name: 'Mouse Logitech MX Master', category: 'Accesorios', stock: 15, price: '$99.99' },
+        { name: 'Teclado Mecánico Corsair', category: 'Accesorios', stock: 25, price: '$149.99' },
+        { name: 'Monitor Samsung 27"', category: 'Electrónicos', stock: 12, price: '$329.99' },
+        { name: 'Auriculares Sony WH-1000XM4', category: 'Audio', stock: 3, price: '$349.99' },
+        { name: 'Webcam Logitech C920', category: 'Accesorios', stock: 18, price: '$79.99' },
+        { name: 'SSD Samsung 1TB', category: 'Almacenamiento', stock: 20, price: '$119.99' },
+        { name: 'Router TP-Link AC1750', category: 'Redes', stock: 7, price: '$89.99' }
       ];
       
       for (const product of initialProducts) {
         await pool.query(
-          'INSERT INTO productos (id, name, category, stock, price) VALUES ($1, $2, $3, $4, $5)',
-          [product.id, product.name, product.category, product.stock, product.price]
+          'INSERT INTO productos (name, category, stock, price) VALUES ($1, $2, $3, $4)',
+          [product.name, product.category, product.stock, product.price]
         );
       }
       console.log('Database seeded with initial products');
@@ -111,7 +118,8 @@ async function initializeDatabase() {
  *                     type: object
  *                     properties:
  *                       id:
- *                         type: string
+ *                         type: integer
+ *                         description: The auto-generated id of the product.
  *                       name:
  *                         type: string
  *                       category:
@@ -153,8 +161,6 @@ app.get('/products', async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               id:
- *                 type: string
  *               name:
  *                 type: string
  *               category:
@@ -165,39 +171,53 @@ app.get('/products', async (req, res) => {
  *                 type: string
  *     responses:
  *       201:
- *         description: The created product
+ *         description: The created product.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 product:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                     category:
+ *                       type: string
+ *                     stock:
+ *                       type: integer
+ *                     price:
+ *                       type: string
  *       400:
  *         description: Missing required fields
- *       409:
- *         description: Product with this ID already exists
  */
 app.post('/products', async (req, res) => {
-  const { id, name, category, stock, price } = req.body;
+  const { name, category, stock, price } = req.body;
   
   // Validate required fields
-  if (!id || !name || !category || stock === undefined || !price) {
+  if (!name || !category || stock === undefined || !price) {
     return res.status(400).json({ 
-      error: 'Missing required fields: id, name, category, stock, price' 
+      error: 'Missing required fields: name, category, stock, price' 
     });
   }
   
   try {
-    await pool.query(
-      'INSERT INTO productos (id, name, category, stock, price) VALUES ($1, $2, $3, $4, $5)',
-      [id, name, category, stock, price]
+    const newProduct = await pool.query(
+      'INSERT INTO productos (name, category, stock, price) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, category, stock, price]
     );
     
     res.status(201).json({ 
       message: 'Producto creado exitosamente',
-      product: { id, name, category, stock, price }
+      product: newProduct.rows[0]
     });
   } catch (err) {
     console.error('Error creating product:', err);
-    if (err.code === '23505') { // Unique constraint violation
-      res.status(409).json({ error: 'Product with this ID already exists' });
-    } else {
-      res.status(500).json({ error: err.message });
-    }
+    res.status(500).json({ error: err.message });
   }
 });
 

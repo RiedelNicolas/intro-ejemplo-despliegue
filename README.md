@@ -8,4 +8,17 @@ Está compuesta por:
 * Una API en Express.js.
 * Una base de datos PostgreSQL.
 
-Todas estas aplicaciones se pueden orquestradas por un `docker-compose`.
+Todas estas aplicaciones pueden ser orquestradas por un `docker-compose`.
+
+### Para este ejemplo de despliegue vamos a usar:
+
+* https://supabase.com/ Para la base de datos
+
+
+
+
+
+--- 
+Otras alternativas que pueden chusmear : 
+* https://render.com/
+* https://fly.io/

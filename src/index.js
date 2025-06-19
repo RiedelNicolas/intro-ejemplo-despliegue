@@ -58,7 +58,7 @@ async function initializeDatabase() {
         name VARCHAR(255) NOT NULL,
         category VARCHAR(100) NOT NULL,
         stock INTEGER NOT NULL DEFAULT 0,
-        price VARCHAR(20) NOT NULL,
+        price NUMERIC(10, 2) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -72,14 +72,14 @@ async function initializeDatabase() {
     if (count === 0) {
       console.log('Seeding database with initial products...');
       const initialProducts = [
-        { name: 'Laptop Dell XPS 13', category: 'Electrónicos', stock: 5, price: '$1,299.99' },
-        { name: 'Mouse Logitech MX Master', category: 'Accesorios', stock: 15, price: '$99.99' },
-        { name: 'Teclado Mecánico Corsair', category: 'Accesorios', stock: 25, price: '$149.99' },
-        { name: 'Monitor Samsung 27"', category: 'Electrónicos', stock: 12, price: '$329.99' },
-        { name: 'Auriculares Sony WH-1000XM4', category: 'Audio', stock: 3, price: '$349.99' },
-        { name: 'Webcam Logitech C920', category: 'Accesorios', stock: 18, price: '$79.99' },
-        { name: 'SSD Samsung 1TB', category: 'Almacenamiento', stock: 20, price: '$119.99' },
-        { name: 'Router TP-Link AC1750', category: 'Redes', stock: 7, price: '$89.99' }
+        { name: 'Laptop Dell XPS 13', category: 'Electrónicos', stock: 5, price: 1299.99 },
+        { name: 'Mouse Logitech MX Master', category: 'Accesorios', stock: 15, price: 99.99 },
+        { name: 'Teclado Mecánico Corsair', category: 'Accesorios', stock: 25, price: 149.99 },
+        { name: 'Monitor Samsung 27"', category: 'Electrónicos', stock: 12, price: 329.99 },
+        { name: 'Auriculares Sony WH-1000XM4', category: 'Audio', stock: 3, price: 349.99 },
+        { name: 'Webcam Logitech C920', category: 'Accesorios', stock: 18, price: 79.99 },
+        { name: 'SSD Samsung 1TB', category: 'Almacenamiento', stock: 20, price: 119.99 },
+        { name: 'Router TP-Link AC1750', category: 'Redes', stock: 7, price: 89.99 }
       ];
       
       for (const product of initialProducts) {
@@ -123,7 +123,7 @@ async function initializeDatabase() {
  *                       stock:
  *                         type: integer
  *                       price:
- *                         type: string
+ *                         type: number
  */
 app.get('/products', async (req, res) => {
   try {
@@ -164,7 +164,7 @@ app.get('/products', async (req, res) => {
  *               stock:
  *                 type: integer
  *               price:
- *                 type: string
+ *                 type: number
  *     responses:
  *       201:
  *         description: The created product.
@@ -187,7 +187,7 @@ app.get('/products', async (req, res) => {
  *                     stock:
  *                       type: integer
  *                     price:
- *                       type: string
+ *                       type: number
  *       400:
  *         description: Missing required fields
  */
@@ -204,7 +204,7 @@ app.post('/products', async (req, res) => {
   try {
     const newProduct = await pool.query(
       'INSERT INTO productos (name, category, stock, price) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, category, stock, price]
+      [name, category, stock, parseFloat(price)]
     );
     
     res.status(201).json({ 

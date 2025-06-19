@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Logic for index.html ---
     const productsTbody = document.getElementById('products-tbody');
     if (productsTbody) {
+        const formatPrice = (price) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            }).format(price);
+        };
+
         const getStockClass = (stock) => {
             if (stock <= 5) return 'stock-low';
             if (stock <= 15) return 'stock-medium';
@@ -25,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${product.name}</td>
                         <td>${product.category}</td>
                         <td><span class="${stockClass}">${product.stock}</span></td>
-                        <td>${product.price}</td>
+                        <td>${formatPrice(product.price)}</td>
                     `;
                     
                     productsTbody.appendChild(row);
@@ -50,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: form.name.value,
                 category: form.category.value,
                 stock: parseInt(form.stock.value),
-                price: form.price.value
+                price: parseFloat(form.price.value)
             };
 
             try {

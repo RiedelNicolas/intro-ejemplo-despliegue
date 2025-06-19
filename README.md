@@ -13,12 +13,17 @@ Todas estas aplicaciones pueden ser orquestradas por un `docker-compose`.
 ### Para este ejemplo de despliegue vamos a usar:
 
 * https://supabase.com/ Para la base de datos
-
-
-
+* La api la vamos a desplegar en https://render.com/
+* 
 
 
 --- 
 Otras alternativas que pueden chusmear : 
 * https://render.com/
-* https://fly.io/
+* http://vercel.com/
+
+Cada cuatri nos quedamos con menos opciones :( .
+
+--- 
+Pueden ver el cuatri pasado en : 
+https://github.com/RiedelNicolas/repo-ejemplo-clase-123/tree/main

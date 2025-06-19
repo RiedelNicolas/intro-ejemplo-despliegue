@@ -1,6 +1,8 @@
 const express = require('express');
 const { Pool } = require('pg');
 require('dotenv').config();
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 app.use(express.json());
@@ -12,6 +14,27 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
+
+// Swagger configuration
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Products API',
+      version: '1.0.0',
+      description: 'API for managing products',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+      },
+    ],
+  },
+  apis: ['./index.js'],
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Database configuration
 const pool = new Pool({
@@ -69,7 +92,35 @@ async function initializeDatabase() {
   }
 }
 
-// Get all products
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: Returns a list of products
+ *     responses:
+ *       200:
+ *         description: The list of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       category:
+ *                         type: string
+ *                       stock:
+ *                         type: integer
+ *                       price:
+ *                         type: string
+ */
 app.get('/products', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM productos ORDER BY id');
@@ -90,7 +141,36 @@ app.get('/products', async (req, res) => {
   }
 });
 
-// Create a new product
+/**
+ * @swagger
+ * /products:
+ *   post:
+ *     summary: Creates a new product
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               stock:
+ *                 type: integer
+ *               price:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: The created product
+ *       400:
+ *         description: Missing required fields
+ *       409:
+ *         description: Product with this ID already exists
+ */
 app.post('/products', async (req, res) => {
   const { id, name, category, stock, price } = req.body;
   
@@ -121,7 +201,15 @@ app.post('/products', async (req, res) => {
   }
 });
 
-// Health check endpoint
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Checks the health of the API
+ *     responses:
+ *       200:
+ *         description: API is running
+ */
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'API is running' });
 });
@@ -135,6 +223,7 @@ async function startServer() {
     console.log(`API running on http://localhost:${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/health`);
     console.log(`Products endpoint: http://localhost:${PORT}/products`);
+    console.log(`Swagger docs: http://localhost:${PORT}/api-docs`);
   });
 }
 
